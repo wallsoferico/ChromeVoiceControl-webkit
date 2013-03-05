@@ -1,0 +1,1 @@
+Chrome Voice Control version using Webkit Speech for speech input. More information about the Web Speech API can be found here: http://updates.html5rocks.com/2013/01/Voice-Driven-Web-Apps-Introduction-to-the-Web-Speech-API.

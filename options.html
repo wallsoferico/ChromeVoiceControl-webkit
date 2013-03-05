@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="popupStyle.css" />
+		<!--<script type="text/javascript" src="./custCommands.js">	</script>-->
+		
+		
+		
+	</head>
+
+		
+		<body>
+			<center>
+				<form action=" " method="get">
+					<div class="TabView" id="TabView">
+					<div class="Tabs" style="width: 425px; height: 70px;">
+						<a id="home" href="#home">Voice Input</a>
+						<a id="website" href="#website">Website Shortcuts</a>
+						<a id="map" href="#map">Map Commands</a><br><br>
+						<a id="browser" href="#browser">Browser Commands</a>
+						<!--<a>Custom Commands</a>-->
+						<a id="credits" href="#credits">Credits</a>
+					</div>
+					<div class="Pages" style="width: 500px; height: 400px;">
+					<div class="Page home" style="display: block">
+					<div class="Pad">
+						<h1>Chrome Voice Control</h1>
+							<!-- <input id="speechInput" type="text" style="font-size:25px;" x-webkit-speech onwebkitspeechchange="onChange()" />
+							<input id="speechInput" type="text" style="font-size:25px;" />
+							<input id="submit" type="submit" onclick="onChange()" />-->
+
+							<br /><br />
+							<b>The Current Language is: 
+							<select id="languages" onchange="javascript:setCommandLanguage(this.options[this.selectedIndex].value)">
+								<option value="en">English</option>
+								<option value="es">Spanish</option>
+								<option value="de">German</option>
+							</select></b>
+							
+							
+					</div>
+					</div>
+					<div class="Page website" style="display: none">
+					<div class="Pad">
+						<center><h1>Website Shortcuts</h1>
+						<b>
+						(opens website in new tab)<br />
+				
+						Facebook<br />
+						Google<br />
+						Yahoo<br />
+						Twitter<br />
+						Flickr<br />
+						MSN<br />
+						Hotmail<br />
+						Digg<br /><br></b>
+						</center>
+					</div>
+					</div>
+					<div class="Page map" style="display: none">
+					<div class="Pad">
+						<center><h1>Map Commands</h1><b>
+						(please try and keep the listed format) <br />
+
+						Map Of [location] <br />
+						Get [thing] Near [location] <br />
+						Get Directions From [start address] to [destination address] <br /></b>
+						<center>
+					</div>
+					</div>
+					<div class="Page browser" style="display: none">
+					<div class="Pad">
+						<center><h1>Browser Commands</h1>
+						<b>
+						open new tab / new tab<br />
+						open new window / new window<br />
+						open incognito window <br />
+						open website in new tab [website name].com <br />
+						open website in new window [website name].com <br />
+						open tab in new window (will move current tab to a new window) <br />
+						open settings / edit settings / open options / edit options<br />
+						delete history<br />
+						delete [website name] from history <br />
+						launch [app or extension]<br />
+						disable / enable [app or extension]<br />
+						uninstall [app or extension]<br />
+						[app] options page<br />
+						store tab (pins current tab) <br />
+						remove stored tab (unpins current tab) <br />
+						close window<br />
+						close tab<br />
+						manage extensions<br />
+						search [search parameters] (does not recognize long phrases)<br />
+						go to [website name].com <br />
+						clear browsing data<br />	
+						<br><br>
+						</b>
+						</center>
+					</div>
+					</div>
+					<!--<div class="Page">
+					<div class="Pad">
+						<center><h1>Create Custom Commands</h1>
+						<b>
+							<br><br>
+							Enter Website (ie: www.websitename.com): <input type="text" id="commandBox" size="50px"/>
+							<br><br>
+							Enter Custom Alias: <br><input type="text" id="aliasBox" size="50px"/>
+							<br><br>
+							<input type="submit" value="Create Command" onclick="javascript:submitCustCommand()" />
+							<br><br>
+							<input type="submit" value="Delete Alias and Website" onclick="javascript:deleteCustCommand()" />
+							<br>
+							(fill out at least one above field)
+							<br><br>
+							<input type="submit" value="Clear All Commands" onclick="javascript:clearCommands()" />
+						</b>
+					</div>
+					</div>-->
+					<div class="Page credits" style="display: none">
+					<div class="Pad">
+						<center><h1>Credits</h1>
+						<br><br><font size="3px">
+						<b>Developed and Supported by Eric Shaw<br><br>
+						Icon Created by Cristain<br><br>
+						The Google Chrome Logo is a trademark of Google<br>
+						I have no association with them in any way<br>
+						</font></b>
+						</center>
+					</div>
+					</div>
+					</div>
+					</div>
+				</form>
+				
+			</center> 
+			
+		</body>
+		<script src="jquery-1.5.2.min.js"></script>
+		<script src="options.js" ></script>
+</html>
