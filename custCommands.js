@@ -1,14 +1,19 @@
 var aComp;
 var wComp;
 
+
 if(window.localStorage) {
 	var db = window.localStorage;
 }
 
+$("#submitCommand").bind('click', submitCustCommand);
+$("#deleteCommand").bind('click', deleteCustCommand);
+$("#clearCommands").bind('click', clearCommands);
+
 function checkCustomCommands(value) {
 	for(var i = 0, l = db.length; i < l; i++) {
-		aComp = db.key(i).substring(0, db.key(i).indexOf(' '));
-		wComp = db.key(i).substring(db.key(i).indexOf(' ') + 1);
+		aComp = db.key(i);
+		wComp = db.getItem(aComp);
 		if(aComp == value) {
 			chrome.tabs.create({"url":wComp});
 			return 0;
@@ -18,6 +23,7 @@ function checkCustomCommands(value) {
 }
 								
 function submitCustCommand() {
+	
 	var website = document.getElementById('commandBox').value;
 	var alias = document.getElementById('aliasBox').value;
 	
@@ -30,8 +36,8 @@ function submitCustCommand() {
 	}
 							
 	for(var k = 0, l = db.length; k < l; k++) {
-		aComp = db.key(k).substring(0, db.key(k).indexOf(' '));
-		wComp = db.key(k).substring(db.key(k).indexOf(' ') + 1);
+		aComp = db.key(k);
+		wComp = db.getItem(aComp);
 		if(aComp == alias) {
 			alert(alias + " already exists for website " + wComp);
 			return -1;
@@ -43,7 +49,9 @@ function submitCustCommand() {
 	}
 							
 	try {
-		db.setItem(alias + " " + website, "string");
+		db.setItem(alias, website);
+		$("#commandBox").val("");
+		$("#aliasBox").val("");
 	}
 	catch(err) {
 		alert("error");
@@ -56,8 +64,8 @@ function submitCustCommand() {
 function printCommands() {
 	document.write("<h1>Custom Shortcuts</h1>");
 	for(var j = 0; j < db.length; j++) {
-		aComp = db.key(j).substring(0, db.key(j).indexOf(' '));
-		wComp = db.key(j).substring(db.key(j).indexOf(' ')+1);
+		aComp = db.key(i);
+		wComp = db.getItem(aComp);
 		document.write("<b>alias " + aComp + " website " + wComp + "</b><br>");
 	}
 }
@@ -67,7 +75,7 @@ function deleteCustCommand() {
 
 	if(website != '') {
 		for(var i = 0; i < db.length; i++) {
-			wComp = db.key(i).substring(db.key(i).indexOf(' ')+1);
+			wComp = db.getItem(aComp);
 			if(wComp == website) {
 				db.removeItem(db.key(i));
 			}
@@ -78,7 +86,7 @@ function deleteCustCommand() {
 	
 	if(alias != '') {
 		for(var i = 0; i < db.length; i++) {
-			aComp = db.key(i).substring(0, db.key(i).indexOf(' '));
+			aComp = db.key(i);
 			if(aComp == alias) {
 				db.removeItem(db.key(i));
 			}

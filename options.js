@@ -1,10 +1,10 @@
 //tabview_initialize('TabView');	
-var array = [".home", ".website", ".maps", ".browser", ".credits" ];
+var array = [".home", ".website", ".map", ".commands", ".browser", ".credits" ];
 
 function hideOthers() {
 	var i = 0;
 	$.each(array, function () {
-		console.log(array[i]);
+		//console.log(array[i]);
 		$(array[i]).css("display", "none");
 		i++;
 	});
@@ -28,4 +28,8 @@ $("#browser").click(function () {
 $("#credits").click(function () {
 	hideOthers();
 	$(".credits").css("display", "block");
+});
+$("#commands").click(function () {
+	hideOthers();
+	$(".commands").css("display", "block");
 });

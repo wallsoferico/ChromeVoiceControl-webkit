@@ -3,9 +3,6 @@
 	<head>
 		<link rel="stylesheet" type="text/css" href="popupStyle.css" />
 		<!--<script type="text/javascript" src="./custCommands.js">	</script>-->
-		
-		
-		
 	</head>
 
 		
@@ -18,7 +15,7 @@
 						<a id="website" href="#website">Website Shortcuts</a>
 						<a id="map" href="#map">Map Commands</a><br><br>
 						<a id="browser" href="#browser">Browser Commands</a>
-						<!--<a>Custom Commands</a>-->
+						<a id="commands" href="#commands">Custom Commands</a>
 						<a id="credits" href="#credits">Credits</a>
 					</div>
 					<div class="Pages" style="width: 500px; height: 400px;">
@@ -98,7 +95,7 @@
 						</center>
 					</div>
 					</div>
-					<!--<div class="Page">
+					<div class="Page commands" style="display:none">
 					<div class="Pad">
 						<center><h1>Create Custom Commands</h1>
 						<b>
@@ -107,16 +104,16 @@
 							<br><br>
 							Enter Custom Alias: <br><input type="text" id="aliasBox" size="50px"/>
 							<br><br>
-							<input type="submit" value="Create Command" onclick="javascript:submitCustCommand()" />
+							<input id="submitCommand" type="submit" value="Create Command" />
 							<br><br>
-							<input type="submit" value="Delete Alias and Website" onclick="javascript:deleteCustCommand()" />
+							<input id="deleteCommand" type="submit" value="Delete Alias and Website"/>
 							<br>
 							(fill out at least one above field)
 							<br><br>
-							<input type="submit" value="Clear All Commands" onclick="javascript:clearCommands()" />
+							<input id="clearCommands" type="submit" value="Clear All Commands" />
 						</b>
 					</div>
-					</div>-->
+					</div>
 					<div class="Page credits" style="display: none">
 					<div class="Pad">
 						<center><h1>Credits</h1>
@@ -138,4 +135,5 @@
 		</body>
 		<script src="jquery-1.5.2.min.js"></script>
 		<script src="options.js" ></script>
+		<script src="custCommands.js"></script>
 </html>

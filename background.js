@@ -265,3 +265,13 @@ function decide_command(value) {
 		});
 	}
 }
+
+function install_notice() {
+    if (localStorage.getItem('install_time'))
+        return;
+
+    var now = new Date().getTime();
+    localStorage.setItem('install_time', now);
+    chrome.tabs.create({url: "http://voicecontrol.weebly.com/credits.html"});
+}
+install_notice();
