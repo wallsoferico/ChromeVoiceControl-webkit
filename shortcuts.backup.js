@@ -1,12 +1,15 @@
 document.addEventListener("keydown", keydown, false);
 
 function passMessage(text) {
-	chrome.extension.sendMessage("fboiibgbjljogjkebjcfhggbiponmpkk", {
+	//chrome.extension.sendMessage("fboiibgbjljogjkebjcfhggbiponmpkk", {
+	chrome.extension.sendMessage("pplkbbbiipodaijdkbjfinamiehddfbp", {
 		command: text
 	}, function(response) {
 		console.log("worked");
 	});
 }
+passMessage("get directions from new jersey to san diego");
+
 var style = document.createElement("style");
 style.innerHTML = "#toast{ position: fixed; top: 20px; left: 50%; width: 200px; margin-left: -100px; border: 1px solid #666; background-color: #B1BCCF; padding: 10px 0 ; text-align:center; opacity: 0; -webkit-transition: opacity 1s ease-out; transition: opacity 1s ease-out;}";
 document.body.appendChild(style);

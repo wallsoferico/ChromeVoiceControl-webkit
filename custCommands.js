@@ -1,103 +1,136 @@
 var aComp;
 var wComp;
 
+var obj = {};
+var storage = chrome.storage.local;
 
-if(window.localStorage) {
-	var db = window.localStorage;
+chrome.storage.local.get('sync', function (i) { 
+	if(i.sync == true)
+		storage = chrome.storage.sync;
+});
+printCommands();
+
+document.getElementById("submitCommand").addEventListener('click', submitCustCommand);
+document.getElementById("clearCommands").addEventListener('click', clearCommands);
+document.getElementById("testbutton").addEventListener('click', checkCustomCommands);
+
+document.getElementById("custCommands").addEventListener('click', function (e) { 
+	if(e.target.id !== undefined && e.target.id !== "") 
+		deleteCustCommand(e.target.id); 
+});
+
+function checkCustomCommands() {
+	var value = document.getElementById('testbox').value;
+	storage.get(value, function (commands) {
+		if(commands[value] !== undefined) {
+			console.log(commands[value]);
+			decide_command(commands[value]);
+		}
+	});
+	
 }
 
-$("#submitCommand").bind('click', submitCustCommand);
-$("#deleteCommand").bind('click', deleteCustCommand);
-$("#clearCommands").bind('click', clearCommands);
+function deleteAlerts() {
+	var alert = document.getElementsByClassName("alert")[0];
+	if(alert !== undefined)
+		alert.parentNode.removeChild(alert);
+}
 
-function checkCustomCommands(value) {
-	for(var i = 0, l = db.length; i < l; i++) {
-		aComp = db.key(i);
-		wComp = db.getItem(aComp);
-		if(aComp == value) {
-			chrome.tabs.create({"url":wComp});
-			return 0;
-		}
-	}
-	decide_command(value);
+function createAlert(msg) {
+	deleteAlerts();
+	var alert = document.createElement("div");
+	alert.innerHTML = msg;
+	alert.className = "alert";
+	
+	var x = document.createElement("button");
+	x.className = "close";
+	x.innerHTML = "&times;";
+	
+	alert.appendChild(x);
+	
+	x.addEventListener("click", deleteAlerts);
+	
+	var parent = document.getElementsByClassName("commands")[3];
+	parent.insertBefore(alert, parent.firstChild);
+	
+	return alert;
+}
+
+function addToList(key, site) {
+	var list = document.getElementById("custCommands");
+	var li = document.createElement("li");
+	li.innerHTML = key + " : " + site;
+	var b = document.createElement("button");
+	b.className = "close";
+	b.id = key;
+	b.innerHTML = "&times;";
+	li.appendChild(b);
+	
+	list.appendChild(li);
 }
 								
 function submitCustCommand() {
-	
+	deleteAlerts();
 	var website = document.getElementById('commandBox').value;
 	var alias = document.getElementById('aliasBox').value;
 	
-	if(website.indexOf('http://') < 0)
-		website = "http://" + website;
-						
-	if(website == '' || alias == '') {
-		alert("fill in all boxes");
-		return 0;
+	obj[alias] = website;
+	
+	if(website == '' || obj[alias] == '') {
+		createAlert("Please fill in all boxes");
+		return -1;
 	}
-							
-	for(var k = 0, l = db.length; k < l; k++) {
-		aComp = db.key(k);
-		wComp = db.getItem(aComp);
-		if(aComp == alias) {
-			alert(alias + " already exists for website " + wComp);
-			return -1;
+	
+	if(website.match(/[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi)) {
+		if(website.indexOf('http://') < 0)
+			website = "http://" + website;
+	}
+		
+	storage.get(alias, function (commands) {
+		if(commands[alias] === undefined) {
+			storage.set(obj);
+			addToList(alias, website);
+			document.getElementById('commandBox').value = "";
+			alias = document.getElementById('aliasBox').value = "";
 		}
-		if(wComp == website) {
-			alert(website + " already has alias " + aComp);
-			return -1;
-		}
-	}
-							
-	try {
-		db.setItem(alias, website);
-		$("#commandBox").val("");
-		$("#aliasBox").val("");
-	}
-	catch(err) {
-		alert("error");
-		if(err.QUOTA_EXCEEDED_ERR) {
-		alert("storage space exceeded"); //error check
-		}
-	}
+		else
+			createAlert("Alias already exists as: " + alias + " for website " + commands[alias]);
+	});
 }
 
 function printCommands() {
-	document.write("<h1>Custom Shortcuts</h1>");
-	for(var j = 0; j < db.length; j++) {
-		aComp = db.key(i);
-		wComp = db.getItem(aComp);
-		document.write("<b>alias " + aComp + " website " + wComp + "</b><br>");
-	}
+	var list = document.getElementById("custCommands");
+	
+	var li = document.createElement("li");
+	li.innerHTML = "Alias : Website";
+	list.appendChild(li);
+	
+	storage.get(null, function (commands) {
+		
+		for(key in commands) {
+			addToList(key, commands[key]);
+		}
+	});
 }
 
-function deleteCustCommand() {
-	var website = document.getElementById('commandBox').value;
-
-	if(website != '') {
-		for(var i = 0; i < db.length; i++) {
-			wComp = db.getItem(aComp);
-			if(wComp == website) {
-				db.removeItem(db.key(i));
-			}
-		}
-	}
-	
-	var alias = document.getElementById('aliasBox').value;
-	
-	if(alias != '') {
-		for(var i = 0; i < db.length; i++) {
-			aComp = db.key(i);
-			if(aComp == alias) {
-				db.removeItem(db.key(i));
-			}
-		}
-	}
-	
-	if(alias == '' && website == '') {
-		document.write("Please fill out at least one field");
-	}
+function deleteCustCommand(id) {
+	storage.remove(id);
+	document.location.reload(true);
 }
 
 function clearCommands() {
-	db.clear();
+	storage.clear();
+	document.location.reload(true);
 }
+
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+  for (key in changes) {
+    var storageChange = changes[key];
+    console.log('Storage key "%s" in namespace "%s" changed. ' +
+                'Old value was "%s", new value is "%s".',
+                key,
+                namespace,
+                storageChange.oldValue,
+                storageChange.newValue);
+  }
+});

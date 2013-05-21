@@ -1,145 +1,134 @@
-chrome.extension.onMessage.addListener(
-
-function(request, sender, onChange) {
-	checkCustomCommands(request.command);
-});
-
-function checkCustomCommands(value) {
-	var db = window.localStorage;
-	var aComp;
-	var wComp;
-	for (var i = 0, l = db.length; i < l; i++) {
-		aComp = db.key(i).substring(0, db.key(i).indexOf(' '));
-		wComp = db.key(i).substring(db.key(i).indexOf(' ') + 1);
-		if (aComp == value) {
-			chrome.tabs.create({
-				"url": wComp
-			});
-			return 0;
-		}
-	}
-	decide_command(value);
-}
-
-function getAppId(value, task) {
-	chrome.management.getAll(function(results) {
-		for (var i = 0; i < results.length; i++) {
-			if (results[i].name.toLowerCase().indexOf(value) >= 0) {
-				id = results[i].id;
-				break;
-			}
-		}
-		if (task == "disable") disableApp(id);
-		else if (task == "enable") enableApp(id);
-		else if (task == "uninstall") uninstallApp(id);
-		else if (task == "launch") launchApp(id);
-	});
-}
-
-function disableApp(id) {
-	if (id !== '') {
-		chrome.management.setEnabled(id, false);
-	}
-}
-
-function enableApp(id) {
-	if (id !== '') {
-		chrome.management.setEnabled(id, true);
-	}
-}
-
-function uninstallApp(id) {
-	var r = confirm("Are you sure you want to uninstall" + value + "?");
-	if (r === true) {
-		chrome.management.uninstall(id);
-	}
-}
-
-function launchApp(id) {
-	chrome.management.getAll(function(result) {
-		if (id !== '') chrome.management.launchApp(id);
-		else alert("extension or app does not exist");
-	});
-}
-
-function decide_command(value) {
-	if (value.indexOf("open") >= 0 || value.indexOf("new") >= 0 || value.indexOf("edit") >= 0) {
-		if (value.indexOf("map") >= 0 || value.indexOf("directions") >= 0 || value.indexOf("near") >= 0) {
-			if (value.indexOf("map of") >= 0) {
-				value = value.substring(value.indexOf("of") + 3);
-				value = "http://maps.google.com/maps?q=" + value;
-				chrome.tabs.create({
-					"url": value
-				});
-			} else if (value.indexOf("get") >= 0 && value.indexOf("near") >= 0) {
-				var v = value.substring((value.indexOf("get") + 4), value.indexOf("near"));
-				var n = value.substring(value.indexOf("near") + 5);
-				value = "http://maps.google.com/maps?q=" + v + "near=" + n;
-				chrome.tabs.create({
-					"url": value
-				});
-			} else if (value.indexOf("get directions from") >= 0) {
-				var v = value.substring((value.indexOf("from") + 5), value.indexOf("to"));
-				value = "http://maps.google.com/?saddr=" + v + "&daddr=" + value.substring(value.indexOf("to") + 3);
-				chrome.tabs.create({
-					"url": value
-				});
-			}
-		} else {
-			if (value == "open new tab" || value == "new tab") {
-				chrome.tabs.create({});
-			} else if (value == "open new window" || value == "new window") {
-				chrome.windows.create();
-			} else if (value == "open incognito window") {
+/* 
+ *
+ * The background file that executes all commands
+ * 
+ */
+ 
+ var commands = ["open tab", "open new tab", "open window", "open new window",
+	"close tab", "close window", "map of", "get directions from", "open incognito window",
+	"open website in new tab", "open website in new window", "open tab in new window",
+	"open settings", "open options", "edit settings", "open history", "manage extension",
+	"translate", "store tab", "remove stored tab", "delete history", "search",
+	"clear browsing data", "facebook", "google", "yahoo", "twitter", "flick", 
+	"hotmail", "dig", "create document", "create presentation", "create spreadsheet",
+	"create new document", "create new presentation", "create new spreadsheet"];
+	
+var actions = {
+	"open tab": openTab,
+	"open window": openWindow,
+	"open new tab": openTab,
+	"open new window": openWindow,
+	"open incognito window": function () {
+		chrome.windows.create({
+			"incognito": true
+		});
+	},
+	"open website in new tab": function (value) {
+		value = value.replace(/.+ tab /, '');
+		openTab(value);
+	},
+	"open website in new window": function (value) {
+		value = value.replace(/.+ window /, '');
+		
+		if (value.indexOf("http://") < 0) 
+			value = "http://" + value;
+		
+		chrome.windows.create({
+			"url": value
+		});
+	},
+	"open tab in new window": function () {
+		chrome.windows.getLastFocused(function(w) {
+			chrome.tabs.getSelected(w.id, function(t) {
 				chrome.windows.create({
-					"incognito": true
+					"tabId": t.id
 				});
-			} else if (value.indexOf("open website") >= 0) {
-				if (value.indexOf("in new tab") >= 0) {
-					value = value.substring(value.indexOf("tab") + 4);
-					if (value.indexOf("http://") < 0) value = "http://" + value;
-					chrome.tabs.create({
-						"url": value
-					});
-				} else if (value.indexOf("in new window") >= 0) {
-					value = value.substring(value.indexOf("window") + 7);
-					if (value.indexOf("http://") < 0) value = "http://" + value;
-					chrome.windows.create({
-						"url": value
-					});
-				}
-			} else if (value == "open tab in new window" || value == "open tabs in new window") {
-				chrome.windows.getLastFocused(function(w) {
-					chrome.tabs.getSelected(w.id, function(t) {
-						chrome.windows.create({
-							"tabId": t.id
-						});
-					});
-				});
-			} else if (value == "open settings" || value == "open options" || value == "edit settings" || value == "edit options") chrome.tabs.create({
-				"url": "chrome://settings/browser"
 			});
-			else if (value == "open history") chrome.tabs.create({
-				"url": "chrome://history/"
+		});
+	},
+	"open options": openTab("chrome://settings/browser"),
+	"open settings": openTab("chrome://settings/browser"),
+	"edit settings": openTab("chrome://settings/browser"),
+	"open history": openTab("chrome://history/"),
+	"delete history": function () {
+		chrome.history.deleteAll(function() {});
+	},
+	"search": function (value) {
+		value = value.replace(/search /, '');
+		openTab("http://google.com/search?as_q=" + value);
+	},
+	"manage extension": openTab("chrome://extensions/"),
+	"clear browsing data": function () {
+		var removal_start = this.parseMilliseconds_(this.timeframe_.value);
+		if (removal_start !== undefined) {
+			chrome.browsingData.remove({ "since" : removal_start }, {
+				"appcache": true,
+				"cache": true,
+				"cookies": true,
+				"downloads": true,
+				"fileSystems": true,
+				"formData": true,
+				"history": true,
+				"indexedDB": true,
+				"localStorage": true,
+				"serverBoundCertificates": true,
+				"pluginData": true,
+				"passwords": true,
+				"webSQL": true
 			});
 		}
-	} else if (value.indexOf("close") >= 0) {
-		if (value == "close tab") {
-			chrome.windows.getLastFocused(function(w) {
-				chrome.tabs.getSelected(w.id, function(t) {
-					chrome.tabs.remove(t.id);
+	},
+	"close tab": function() {
+		chrome.windows.getLastFocused(function(w) {
+			chrome.tabs.getSelected(w.id, function(t) {
+				chrome.tabs.remove(t.id);
+			});
+		});
+	},
+	"close window": function() {
+		chrome.windows.getLastFocused(function(w) {
+			chrome.windows.remove(w.id);
+		});
+	},
+	"map of": function (value) {
+		console.log(value);
+		value = value.replace(/map of /, '');
+		value = "http://maps.google.com/maps?q=" + value;
+		chrome.tabs.create({
+			"url": value
+		});
+	},
+	"get directions from": function (value) {
+		var f = value.replace(/get directions from /, '').replace(/to .+/, '');
+		var t = value.replace(/.+ to /, '');
+		var url = "http://maps.google.com/?saddr=" + f + "&daddr=" + t;
+		chrome.tabs.create({
+			"url": url
+		});
+	},
+	"store tab": function () {
+		chrome.windows.getLastFocused(function(w) {
+			chrome.tabs.getSelected(w.id, function(t) {
+				chrome.tabs.update(t.id, {
+					"pinned": true
 				});
 			});
-		} else if (value == "close window") {
-			chrome.windows.getLastFocused(function(w) {
-				chrome.windows.remove(w.id);
+		});
+	},
+	"remove stored tab": function () {
+		chrome.windows.getLastFocused(function(w) {
+			chrome.tabs.getSelected(w.id, function(t) {
+				chrome.tabs.update(t.id, {
+					"pinned": false
+				});
 			});
-		}
-	} else if (value.indexOf("translate") >= 0) {
+		});
+	}
+	"translate": function (value) {
 		var array = new Array("afrikaans", "af", "albanian", "sq", "arabic", "ar", "belarusian", "be", "bulgarian", "bg", "catalan", "ca", "chinese", "zh", "chinese simplified", "zh-CN", "chinese traditional", "zh-TW", "croation", "hr", "czech", "cs", "danish", "da", "dutch", "nl", "english", "en", "estonian", "et", "filipino", "tl", "finnish", "fi", "french", "fr", "galician", "gl", "german", "de", "greek", "el", "haitian creole", "ht", "hebrew", "iw", "hindi", "hi", "hungarian", "hu", "icelandic", "is", "indonesian", "id", "irish", "ga", "italian", "it", "japanese", "ja", "korean", "ko", "latvian", "lv", "lithuanian", "lt", "macedonian", "mk", "malay", "ms", "maltese", "mt", "norwegian", "no", "persian", "fa", "polish", "pl", "portuguese", "pt", "portuguese portugal", "pt-PT", "romanian", "ro", "russian", "ru", "serbian", "sr", "slovak", "sk", "slovenian", "sl", "spanish", "es", "swahili", "sw", "swedish", "sv", "tagalog", "tl", "thai", "th", "turkish", "tr", "ukrainian", "uk", "vietnamese", "vi", "welsh", "cy", "yiddish", "yi");
-		value = value.substring(value.indexOf("translate") + 10);
-		lang = value.substring(value.lastIndexOf(" to ") + 4);
-		value = value.substring(0, value.lastIndexOf(" to "));
+		value = value.replace(/translate /, '');
+		lang = value.replace(/.+ to /, '');
+		value = value.replace(/ to .+/, '');
 		for (var a = 0; a < array.length; a += 2) {
 			if (array[a] == lang) {
 				value = "http://translate.google.com/#auto|" + array[a + 1] + "|" + value;
@@ -148,124 +137,72 @@ function decide_command(value) {
 				});
 			}
 		}
-	} else {
-		if (value == "manage extensions") chrome.tabs.create({
-			"url": "chrome://extensions"
-		});
-		else if (value == "store tab") {
-			chrome.windows.getLastFocused(function(w) {
-				chrome.tabs.getSelected(w.id, function(t) {
-					chrome.tabs.update(t.id, {
-						"pinned": true
-					});
-				});
-			});
-		} else if (value == "remove stored tab") {
-			chrome.windows.getLastFocused(function(w) {
-				chrome.tabs.getSelected(w.id, function(t) {
-					chrome.tabs.update(t.id, {
-						"pinned": false
-					});
-				});
-			});
-		} else if (value == "delete history") {
-			chrome.history.deleteAll(function() {});
-		} else if (value.indexOf("delete") >= 0 && value.indexOf("from history") >= 0) {
-			value = value.substring(value.indexOf("delete") + 7, value.indexOf("from history"));
-			value = "http://www." + value;
-			chrome.history.deleteURL({
-				"url": value
-			});
-		} else if (value.indexOf("search") >= 0) {
-			value = value.substring(value.indexOf("search") + 7);
-			value = "http://google.com/search?as_q=" + value;
-			chrome.tabs.create({
-				"url": value
-			});
-		} else if (value.indexOf("go to") >= 0) {
-			value = value.substring(value.indexOf("go to") + 6);
-			if (value.indexOf("http://") < 0) value = "http://" + value;
-			chrome.windows.getLastFocused(function(w) {
-				chrome.tabs.getSelected(w.id, function(t) {
-					chrome.tabs.update(t.id, {
-						"url": value
-					});
-				});
-			});
-		} else if (value.indexOf("goto") >= 0) {
-			value = value.substring(value.indexOf("goto") + 5);
-			if (value.indexOf("http://") < 0) value = "http://" + value;
-			chrome.windows.getLastFocused(function(w) {
-				chrome.tabs.getSelected(w.id, function(t) {
-					chrome.tabs.update(t.id, {
-						"url": value
-					});
-				});
-			});
-		} else if (value.indexOf("launch") >= 0) {
-			value = value.substring(value.indexOf("launch") + 7);
-			getAppId(value, "launch");
-		} else if (value.indexOf("disable") >= 0) {
-			value = value.substring(value.indexOf("disable") + 8);
-			getAppId(value, "disable");
-		} else if (value.indexOf("enable") >= 0) {
-			value = value.substring(value.indexOf("enable") + 7);
-			getAppId(value, "enable");
-		} else if (value.indexOf("uninstall") >= 0) {
-			value = value.substring(value.indexOf("uninstall") + 10);
-			getAppId(value, "uninstall");
-		} else if (value.indexOf("options page") >= 0) {
-			value = value.substring(0, value.indexOf("options page"));
-			var options;
-			chrome.management.getAll(function(results) {
-				for (var i = 0; i < results.length; i++) {
-					if (results[i].name.toLowerCase().indexOf(value) >= 0) {
-						options = results[i].optionsUrl;
-						break;
-					}
-				}
-			});
-			chrome.windows.getLastFocused(function(w) {
-				chrome.tabs.create(w.id, {
-					"url": options
-				});
-			});
-		} else if (value == "clear browsing data") chrome.tabs.create({
-			"url": "chrome://settings/clearBrowserData"
-		});
-		else if (value.indexOf(".com") >= 0) {
-			value = "http://" + value;
-			chrome.tabs.create({
-				"url": value
-			});
-		} 
-        else if (value.toLowerCase() == "facebook") chrome.tabs.create({
-			"url": "http://www.facebook.com/"
-		});
-		else if (value.toLowerCase() == "google") chrome.tabs.create({
-			"url": "http://www.google.com/"
-		});
-		else if (value.toLowerCase() == "yahoo") chrome.tabs.create({
-			"url": "http://www.yahoo.com/"
-		});
-		else if (value.toLowerCase() == "twitter") chrome.tabs.create({
-			"url": "http://www.twitter.com/"
-		});
-		else if (value.toLowerCase() == "flicker" || value == "flickr") chrome.tabs.create({
-			"url": "http://www.flickr.com/"
-		});
-		else if (value.toLowerCase() == "msn") chrome.tabs.create({
-			"url": "http://www.msn.com/"
-		});
-		else if (value.toLowerCase() == "hotmail") chrome.tabs.create({
-			"url": "http://www.hotmail.com/"
-		});
-		else if (value.toLowerCase() == "dig" || value == "digg") chrome.tabs.create({
-			"url": "http://www.digg.com/"
-		});
-	}
+	},
+	"create new document": createDocs("document"),
+	"create document": createDocs("document"),
+	"create new presentation": createDocs("presentation"),
+	"create presentation": createDocs("presentation"),
+	"create new spreadsheet": createDocs("spreadsheet"),
+	"create spreadsheet": createDocs("spreadsheet"),
+	"facebook": openTab("www.facebook.com"),
+	"google": openTab("www.google.com"),
+	"yahoo": openTab("www.yahoo.com"),
+	"twitter": openTab("www.twitter.com"),
+	"flick": openTab("www.flicker.com"), 
+	"outlook": openTab("www.outlook.com"),
+	"dig": openTab("www.digg.com")
+	
+};
+
+var storage = chrome.storage.local;
+
+chrome.storage.local.get('sync', function (i) { 
+	if(i.sync == true)
+		storage = chrome.storage.sync;
+});
+ 
+chrome.runtime.onMessage.addListener(
+	function(request, sender, onChange) {
+		checkCustomCommands(request.command);
+});
+
+function openTab(value) {
+	if(value === undefined)
+		chrome.tabs.create({});
+	else
+		chrome.tabs.create({ url: value });
+}
+function openWindow() {
+	chrome.windows.create();
 }
 
+function createDocs(type) {
+	openTab("https://docs.google.com/" + type);
+}
+
+function checkCustomCommands(value) {
+	storage.get(value, function (commands) {
+		if(commands[value] !== undefined) {
+			console.log(commands[value]);
+			decide_command(commands[value]);
+		}
+	});
+	decide_command(value);
+}
+
+function runCommand(sysCommand, value) {
+	actions[sysCommand](value);
+}
+
+function decide_command(value) {
+	console.log(value);
+	var querySuccess = false;
+	commands.forEach(function(sysCommand) {
+		if(!querySuccess && value.indexOf(sysCommand) != -1) {
+			querySuccess = runCommand(sysCommand, value);
+		}
+	});
+}
 function install_notice() {
     if (localStorage.getItem('install_time'))
         return;

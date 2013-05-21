@@ -1,35 +1,26 @@
-//tabview_initialize('TabView');	
-var array = [".home", ".website", ".map", ".commands", ".browser", ".credits" ];
+document.getElementsByClassName("tabmenu")[0].addEventListener('click', function (e) {
+	e = e || window.event;
+	if(e.target.parentNode.parentNode.className == "tabmenu") {
+		document.getElementsByClassName("active")[0].className = "";
+		document.getElementById(e.target.parentNode.id + "Content").className = "active";
+	}
+}, false);
 
-function hideOthers() {
-	var i = 0;
-	$.each(array, function () {
-		//console.log(array[i]);
-		$(array[i]).css("display", "none");
-		i++;
-	});
-}
-$("#home").click(function () {
-	hideOthers();
-	$(".home").css("display", "block");
+var hash = window.location.hash;
+if(hash == "")
+	hash = "#websites";
+document.getElementById(hash.substr(1) + "Content").className = "active";
+
+document.getElementById("sync").addEventListener("click", function () {
+	chrome.storage.local.set({'sync': true});
 });
-$("#website").click(function () {
-	hideOthers();
-	$(".website").css("display", "block");
+document.getElementById("local").addEventListener("click", function () {
+	chrome.storage.local.set({'sync': false});
 });
-$("#map").click(function () {
-	hideOthers();
-	$(".map").css("display", "block");
-});
-$("#browser").click(function () {
-	hideOthers();
-	$(".browser").css("display", "block");
-});
-$("#credits").click(function () {
-	hideOthers();
-	$(".credits").css("display", "block");
-});
-$("#commands").click(function () {
-	hideOthers();
-	$(".commands").css("display", "block");
+
+chrome.storage.local.get('sync', function (i) {
+	if(i.sync == true)
+		document.getElementById("sync").checked = true;
+	else
+		document.getElementById("local").checked = true;
 });

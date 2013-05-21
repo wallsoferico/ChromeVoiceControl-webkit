@@ -3,6 +3,12 @@ Chrome Voice Control version using Webkit Speech for speech input. More informat
 Website: voicecontrol.weebly.com
 
 Changelog:
+v4.3.7:
+- Changed options page
+- added creating Google Docs
+- hopefully performance increases
+- refactored code
+older:
 - Major updates from original version
 - Updated to new Webkit Speech API
 - Added back in Custom Commands
