@@ -12,7 +12,6 @@ printCommands();
 
 document.getElementById("submitCommand").addEventListener('click', submitCustCommand);
 document.getElementById("clearCommands").addEventListener('click', clearCommands);
-document.getElementById("testbutton").addEventListener('click', checkCustomCommands);
 
 document.getElementById("custCommands").addEventListener('click', function (e) { 
 	if(e.target.id !== undefined && e.target.id !== "") 
