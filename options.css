@@ -176,3 +176,20 @@ button.close {
 	font-weight: bold;
 	text-align: center;
 }
+
+.separator {
+	width: 96%;
+	height: 1px;
+	float: right;
+	background-color: #ccc;
+	margin: 5px;
+	-webkit-box-shadow: 0px 1px 1px #fff;
+}
+
+.footer {
+	font-size: 12px;
+	text-align: right;
+	line-height: 25px;
+	padding-right: 10px;
+	color: #555;
+}
