@@ -3,16 +3,7 @@
  * The background file that executes all commands
  * 
  */
- 
- var commands = ["open tab", "open new tab", "open window", "open new window",
-	"close tab", "close window", "map of", "get directions from", "open incognito window",
-	"open website in new tab", "open website in new window", "open tab in new window",
-	"open settings", "open options", "edit settings", "open history", "manage extension",
-	"translate", "store tab", "remove stored tab", "delete history", "search",
-	"clear browsing data", "facebook", "google", "yahoo", "twitter", "flick", 
-	"hotmail", "dig", "create document", "create presentation", "create spreadsheet",
-	"create new document", "create new presentation", "create new spreadsheet"];
-	
+
 var actions = {
 	"open tab": openTab,
 	"open window": openWindow,
@@ -46,10 +37,10 @@ var actions = {
 			});
 		});
 	},
-	"open options": openTab("chrome://settings/browser"),
-	"open settings": openTab("chrome://settings/browser"),
-	"edit settings": openTab("chrome://settings/browser"),
-	"open history": openTab("chrome://history/"),
+	"open options": function() { openTab("chrome://settings/browser") },
+	"open settings": function() { openTab("chrome://settings/browser") },
+	"edit settings": function() { openTab("chrome://settings/browser") },
+	"open history": function() { openTab("chrome://history/") },
 	"delete history": function () {
 		chrome.history.deleteAll(function() {});
 	},
@@ -57,7 +48,7 @@ var actions = {
 		value = value.replace(/search /, '');
 		openTab("http://google.com/search?as_q=" + value);
 	},
-	"manage extension": openTab("chrome://extensions/"),
+	"manage extension": function() { openTab("chrome://extensions/") },
 	"clear browsing data": function () {
 		var removal_start = this.parseMilliseconds_(this.timeframe_.value);
 		if (removal_start !== undefined) {
@@ -138,19 +129,19 @@ var actions = {
 			}
 		}
 	},
-	"create new document": createDocs("document"),
-	"create document": createDocs("document"),
-	"create new presentation": createDocs("presentation"),
-	"create presentation": createDocs("presentation"),
-	"create new spreadsheet": createDocs("spreadsheet"),
-	"create spreadsheet": createDocs("spreadsheet"),
-	"facebook": openTab("www.facebook.com"),
-	"google": openTab("www.google.com"),
-	"yahoo": openTab("www.yahoo.com"),
-	"twitter": openTab("www.twitter.com"),
-	"flick": openTab("www.flicker.com"), 
-	"outlook": openTab("www.outlook.com"),
-	"dig": openTab("www.digg.com")
+	"create new document": function() { createDocs("document") },
+	"create document": function() { createDocs("document") },
+	"create new presentation": function() { createDocs("presentation") },
+	"create presentation": function() { createDocs("presentation") },
+	"create new spreadsheet": function() { createDocs("spreadsheet") },
+	"create spreadsheet": function() { createDocs("spreadsheet") },
+	"facebook": function() { openTab("www.facebook.com") },
+	"google": function() { openTab("www.google.com") },
+	"yahoo": function() { openTab("www.yahoo.com") },
+	"twitter": function() { openTab("www.twitter.com") },
+	"flick": function() { openTab("www.flicker.com"), } 
+	"outlook": function() { openTab("www.outlook.com") },
+	"dig": function() { openTab("www.digg.com" })
 	
 };
 
@@ -197,11 +188,13 @@ function runCommand(sysCommand, value) {
 function decide_command(value) {
 	console.log(value);
 	var querySuccess = false;
-	commands.forEach(function(sysCommand) {
-		if(!querySuccess && value.indexOf(sysCommand) != -1) {
+	var sysCommand;
+	for(var actionIndex in actions) {
+		sysCommand = actions[actionIndex];
+		if(!querySuccess && sysCommand && value.indexOf(sysCommand) != -1) {
 			querySuccess = runCommand(sysCommand, value);
 		}
-	});
+	}
 }
 function install_notice() {
     if (localStorage.getItem('install_time'))
