@@ -7,10 +7,10 @@
 var array = new Array("afrikaans", "af", "albanian", "sq", "arabic", "ar", "belarusian", "be", "bulgarian", "bg", "catalan", "ca", "chinese", "zh", "chinese simplified", "zh-CN", "chinese traditional", "zh-TW", "croation", "hr", "czech", "cs", "danish", "da", "dutch", "nl", "english", "en", "estonian", "et", "filipino", "tl", "finnish", "fi", "french", "fr", "galician", "gl", "german", "de", "greek", "el", "haitian creole", "ht", "hebrew", "iw", "hindi", "hi", "hungarian", "hu", "icelandic", "is", "indonesian", "id", "irish", "ga", "italian", "it", "japanese", "ja", "korean", "ko", "latvian", "lv", "lithuanian", "lt", "macedonian", "mk", "malay", "ms", "maltese", "mt", "norwegian", "no", "persian", "fa", "polish", "pl", "portuguese", "pt", "portuguese portugal", "pt-PT", "romanian", "ro", "russian", "ru", "serbian", "sr", "slovak", "sk", "slovenian", "sl", "spanish", "es", "swahili", "sw", "swedish", "sv", "tagalog", "tl", "thai", "th", "turkish", "tr", "ukrainian", "uk", "vietnamese", "vi", "welsh", "cy", "yiddish", "yi");
  
 var actions = {
-	"open tab": openTab,
-	"open window": openWindow,
-	"open new tab": openTab,
-	"open new window": openWindow,
+	"open tab": function() { openTab() },
+	"open window": function() { openWindow() },
+	"open new tab": function () { openTab() },
+	"open new window": function() { openWindow() },
 	"open incognito window": function () {
 		chrome.windows.create({
 			"incognito": true
@@ -52,23 +52,26 @@ var actions = {
 	},
 	"manage extension": function() { openTab("chrome://extensions/") },
 	"clear browsing data": function () {
-		var removal_start = this.parseMilliseconds_(this.timeframe_.value);
-		if (removal_start !== undefined) {
-			chrome.browsingData.remove({ "since" : removal_start }, {
-				"appcache": true,
-				"cache": true,
-				"cookies": true,
-				"downloads": true,
-				"fileSystems": true,
-				"formData": true,
-				"history": true,
-				"indexedDB": true,
-				"localStorage": true,
-				"serverBoundCertificates": true,
-				"pluginData": true,
-				"passwords": true,
-				"webSQL": true
-			});
+		if(confirm("Are you sure you wish to delete your browsing data?")) {
+			var d = new Date();
+			var removal_start = d.getMilliseconds();
+			if (removal_start !== undefined) {
+				chrome.browsingData.remove({ "since" : removal_start }, {
+					"appcache": true,
+					"cache": true,
+					"cookies": true,
+					"downloads": true,
+					"fileSystems": true,
+					"formData": true,
+					"history": true,
+					"indexedDB": true,
+					"localStorage": true,
+					"serverBoundCertificates": true,
+					"pluginData": true,
+					"passwords": true,
+					"webSQL": true
+				});
+			}
 		}
 	},
 	"close tab": function() {
@@ -85,14 +88,15 @@ var actions = {
 	},
 	"map of": function (value) {
 		console.log(value);
-		value = value.replace(/map of /, '');
+		value = value.replace(/map of|map of /g, '');
+		console.log(value);
 		value = "http://maps.google.com/maps?q=" + value;
 		chrome.tabs.create({
 			"url": value
 		});
 	},
-	"get directions from": function (value) {
-		var f = value.replace(/get directions from /, '').replace(/to .+/, '');
+	"directions from": function (value) {
+		var f = value.replace(/directions from /, '').replace(/to .+/, '');
 		var t = value.replace(/.+ to /, '');
 		var url = "http://maps.google.com/?saddr=" + f + "&daddr=" + t;
 		chrome.tabs.create({
@@ -116,7 +120,7 @@ var actions = {
 				});
 			});
 		});
-	}
+	},
 	"translate": function (value) {
 		value = value.replace(/translate /, '');
 		lang = value.replace(/.+ to /, '');
@@ -136,13 +140,13 @@ var actions = {
 	"create presentation": function() { createDocs("presentation") },
 	"create new spreadsheet": function() { createDocs("spreadsheet") },
 	"create spreadsheet": function() { createDocs("spreadsheet") },
-	"facebook": function() { openTab("www.facebook.com") },
-	"google": function() { openTab("www.google.com") },
-	"yahoo": function() { openTab("www.yahoo.com") },
-	"twitter": function() { openTab("www.twitter.com") },
-	"flick": function() { openTab("www.flicker.com"), } 
-	"outlook": function() { openTab("www.outlook.com") },
-	"dig": function() { openTab("www.digg.com" })
+	"facebook": function() { openTab("http://www.facebook.com") },
+	"google": function() { openTab("http://www.google.com") },
+	"yahoo": function() { openTab("http://www.yahoo.com") },
+	"twitter": function() { openTab("http://www.twitter.com") },
+	"flick": function() { openTab("http://www.flicker.com") },  
+	"outlook": function() { openTab("http://www.outlook.com") },
+	"dig": function() { openTab("http://www.digg.com") }
 	
 };
 
@@ -156,6 +160,7 @@ chrome.storage.local.get('sync', function (i) {
 chrome.runtime.onMessage.addListener(
 	function(request, sender, onChange) {
 		checkCustomCommands(request.command);
+		
 });
 
 function openTab(value) {
@@ -191,8 +196,10 @@ function decide_command(value) {
 	var querySuccess = false;
 	var sysCommand;
 	for(var actionIndex in actions) {
-		sysCommand = actions[actionIndex];
+		sysCommand = actionIndex;
+		
 		if(!querySuccess && sysCommand && value.indexOf(sysCommand) != -1) {
+			console.log("success");
 			querySuccess = runCommand(sysCommand, value);
 		}
 	}

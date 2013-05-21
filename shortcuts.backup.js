@@ -1,14 +1,16 @@
 document.addEventListener("keydown", keydown, false);
 
+var recognition = new webkitSpeechRecognition();
+
 function passMessage(text) {
 	//chrome.extension.sendMessage("fboiibgbjljogjkebjcfhggbiponmpkk", {
-	chrome.extension.sendMessage("pplkbbbiipodaijdkbjfinamiehddfbp", {
+	chrome.runtime.sendMessage( {
 		command: text
 	}, function(response) {
 		console.log("worked");
+		recognition.stop();
 	});
 }
-passMessage("get directions from new jersey to san diego");
 
 var style = document.createElement("style");
 style.innerHTML = "#toast{ position: fixed; top: 20px; left: 50%; width: 200px; margin-left: -100px; border: 1px solid #666; background-color: #B1BCCF; padding: 10px 0 ; text-align:center; opacity: 0; -webkit-transition: opacity 1s ease-out; transition: opacity 1s ease-out;}";
@@ -32,7 +34,7 @@ function keydown(e) {
 	if (e.keyCode == '90' && e.ctrlKey && e.altKey) {
 		showToast();
 		if (('webkitSpeechRecognition' in window)) {
-			var recognition = new webkitSpeechRecognition();
+			
 			recognition.continuous = true;
 			recognition.interimResults = true;
 			recognition.onstart = function() {
@@ -53,11 +55,12 @@ function keydown(e) {
 					if (event.results[i].isFinal) {
 						console.log("Last message: " + event.results[i][0].transcript);
 						passMessage(event.results[i][0].transcript);
+						recognition.stop();
 					} else {
 						console.log(event.results[i][0].transcript);
 					}
 				}
-				recognition.stop();
+				
 			};
 		}
 	}
