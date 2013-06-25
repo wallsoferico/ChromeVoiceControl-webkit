@@ -1,11 +1,10 @@
 {
   "name": "Chrome Voice Control",
   "manifest_version": 2,
-  "version": "4.3.8",
+  "version": "4.4.2",
   "description": "Uses speech recognition to execute commands in Google Chrome",
   "background": {
-	"scripts": ["background.js"],
-	"persistent": false
+	"scripts": ["background.js"]
 	},
   "browser_action" :
   {
