@@ -8,7 +8,7 @@ function passMessage(text) {
 		command: text
 	}, function(response) {
 		console.log("worked");
-		recognition.stop();
+		window.recognition.stop();
 	});
 }
 
@@ -27,6 +27,7 @@ function showToast() {
 function hideToast(){
 	var alert = document.getElementById("toast");
 	alert.style.opacity = 0;
+	window.recognition.stop();
 }
 
 function keydown(e) {
@@ -35,27 +36,28 @@ function keydown(e) {
 		if (('webkitSpeechRecognition' in window)) {
 			
 			//recognition.continuous = true;
-			recognition.interimResults = true;
-			recognition.onstart = function() {
+			window.recognition.interimResults = true;
+			window.recognition.onstart = function() {
 				showToast();
 				recognizing = true;
+				setTimeout(hideToast, 10000);
 			};
-			recognition.start();
+			window.recognition.start();
 			ignore_onend = false;
-			recognition.onend = function() {
+			window.recognition.onend = function() {
 				hideToast();
 				recognizing = false;
 				if (ignore_onend) {
 					return;
 				}
 			};
-			recognition.onresult = function(event) {
+			window.recognition.onresult = function(event) {
 				hideToast();
 				for (var i = event.resultIndex; i < event.results.length; ++i) {
 					if (event.results[i].isFinal) {
 						console.log("Last message: " + event.results[i][0].transcript);
 						passMessage(event.results[i][0].transcript);
-						recognition.stop();
+						window.recognition.stop();
 					} else {
 						console.log(event.results[i][0].transcript);
 					}
@@ -72,15 +74,15 @@ var ignore_onend;
 var start_timestamp;
 
 //start_button.style.display = 'inline-block';
-var recognition = new webkitSpeechRecognition();
-recognition.continuous = true;
-recognition.interimResults = true;
+window.recognition = new webkitSpeechRecognition();
+window.recognition.continuous = true;
+window.recognition.interimResults = true;
 
-recognition.onstart = function() {
+window.recognition.onstart = function() {
 	recognizing = true;
 };
 
-recognition.onerror = function(event) {
+window.recognition.onerror = function(event) {
 	if (event.error == 'no-speech') {
 		ignore_onend = true;
 	}
@@ -92,7 +94,7 @@ recognition.onerror = function(event) {
 	}
 };
 
-recognition.onend = function() {
+window.recognition.onend = function() {
 	recognizing = false;
 	if (ignore_onend) {
 		return;
@@ -112,11 +114,11 @@ recognition.onend = function() {
     }
   };
 
-  recognition.onresult = function(event) {
+  window.recognition.onresult = function(event) {
     var interim_transcript = '';
     if (typeof(event.results) == 'undefined') {
-      recognition.onend = null;
-      recognition.stop();
+      window.recognition.onend = null;
+      window.recognition.stop();
       upgrade();
       return;
     }
